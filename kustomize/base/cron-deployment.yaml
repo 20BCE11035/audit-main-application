@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: retraced-cron
+  namespace: '{{repl ConfigOption "namespace"}}'
+spec:
+  selector:
+    matchLabels:
+      tier: cron
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: auditlog
+        tier: cron
+        dest: nsq
+        source: cron
+    spec:
+      containers:
+        - name: cron
+          image: retracedhq/retraced-local
+          imagePullPolicy: IfNotPresent
+          command:
+            - /bin/sh
+            - -c
+            - /usr/local/bin/retraced-auditlog-cron /crontab 2>&1 | grep ERRO
+          env:
+            - name: NSQD_HOST
+              valueFrom:
+                secretKeyRef:
+                  key: NSQD_HOST
+                  name: auditlog
+            - name: NSQD_HTTP_PORT
+              valueFrom:
+                secretKeyRef:
+                  key: NSQD_HTTP_PORT
+                  name: auditlog
+          resources:
+            requests:
+              cpu: 10m
+            limits:
+              cpu: 100m

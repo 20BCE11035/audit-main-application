@@ -1,0 +1,88 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: retraced-processor
+  namespace: '{{repl ConfigOption "namespace"}}'
+spec:
+  selector:
+    matchLabels:
+      tier: processor
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: auditlog
+        tier: processor
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 2
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - auditlog
+                    - key: tier
+                      operator: In
+                      values:
+                        - processor
+                topologyKey: "kubernetes.io/hostname"
+      volumes:
+        - name: tmpdir
+          emptyDir: {}
+      containers:
+        - name: processor
+          image: retracedhq/retraced-local
+          imagePullPolicy: IfNotPresent
+          command:
+            - node
+            - --inspect=0.0.0.0
+            - build/src/_processor/index.js
+          ports:
+            - containerPort: 3000
+              name: http
+              protocol: TCP
+          startupProbe:
+            httpGet:
+              port: 3000
+              path: /healthz
+            periodSeconds: 10
+            failureThreshold: 5
+          readinessProbe:
+            httpGet:
+              port: 3000
+              path: /healthz
+            periodSeconds: 30
+            failureThreshold: 5
+            successThreshold: 2
+          livenessProbe:
+            httpGet:
+              port: 3000
+              path: /livez
+            periodSeconds: 60
+            failureThreshold: 5
+          resources:
+            requests:
+              cpu: 100m
+            limits:
+              cpu: 1000m
+
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmpdir
+          envFrom:
+            - secretRef:
+                name: auditlog
+          env:
+            - name: TMPDIR
+              value: /tmp
+            - name: BUGSNAG_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: auditlog
+                  key: PROCESSOR_TOKEN
+            - name: PG_SEARCH
+              value: ""

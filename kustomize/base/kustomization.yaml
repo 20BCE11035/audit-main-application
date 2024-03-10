@@ -1,0 +1,12 @@
+resources:
+  - ./api-deployment.yaml
+  - ./cron-deployment.yaml
+  - ./dbutil-deployment.yaml
+  - ./migratees-job.yaml
+  - ./migratepg-job.yaml
+  - ./nsqd-deployment.yaml
+  - ./nsqd-service.yaml
+  - ./processor-deployment.yaml
+  - ./admin-portal-deployment.yaml
+
+namespace: default

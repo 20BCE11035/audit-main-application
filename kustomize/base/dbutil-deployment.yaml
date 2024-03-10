@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: retraced-dbutil
+  namespace: '{{repl ConfigOption "namespace"}}'
+  labels:
+    app: retraced
+    tier: dbutil
+spec:
+  selector:
+    matchLabels:
+      app: retraced
+      tier: dbutil
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: retraced
+        tier: dbutil
+    spec:
+      containers:
+        - name: dbutil
+          image: retracedhq/retraced-local
+          command:
+            - /bin/sleep
+            - infinity
+          envFrom:
+            - secretRef:
+                name: auditlog

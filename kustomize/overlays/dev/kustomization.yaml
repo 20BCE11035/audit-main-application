@@ -1,0 +1,23 @@
+---
+bases:
+  - ../../base
+  - ../../base/services
+  - ../dbs
+
+resources:
+  - ./secrets.yaml
+  - ./bootstrap-secrets.yaml
+  - ./admin-portal-secrets.yaml
+
+patches:
+  - ./admin-portal-service.yaml
+  - ./api-service.yaml
+
+commonLabels:
+  retraceddev: "1"
+
+images:
+  - name: boxyhq/jackson
+    newTag: 1.7.4
+  - name: retracedhq/retraced
+    newTag: 1.5.5

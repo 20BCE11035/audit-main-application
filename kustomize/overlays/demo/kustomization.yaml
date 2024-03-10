@@ -1,0 +1,23 @@
+---
+bases:
+  - ../../base
+
+resources:
+  - ./secrets.yaml
+  - ./bootstrap-secrets.yaml
+  - ./admin-portal-secrets.yaml
+
+patches:
+  - ./admin-portal-deployment.yaml
+  - ./api-deployment.yaml
+  - ./cron-deployment.yaml
+  - ./dbutil-deployment.yaml
+  - ./migratees-job.yaml
+  - ./migratepg-job.yaml
+  - ./processor-deployment.yaml
+
+images:
+  - name: boxyhq/jackson
+    newTag: 1.7.4
+  - name: retracedhq/retraced
+    newTag: 1.5.5
